@@ -2,6 +2,8 @@
 using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Series;
+using SciChart.Charting.Visuals;
+using SciChart.Charting.Visuals.Axes;
 using Proteomics.Fragmentation;
 using Proteomics.ProteolyticDigestion;
 using Proteomics.RetentionTimePrediction;
@@ -11,12 +13,13 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Globalization;
+using System.Windows.Media;
 
 namespace MetaMorpheusGUI
 {
     public class PlotModelStat : INotifyPropertyChanged, IPlotModel
     {
-        private PlotModel privateModel;
+        private SciChartSurface privateModel;
         private ObservableCollection<PsmFromTsv> allPsms;
 
         public static List<string> PlotNames = new List<string> {
@@ -40,7 +43,7 @@ namespace MetaMorpheusGUI
             { ProductType.M, OxyColors.Firebrick }
         };
 
-        public PlotModel Model
+        public SciChartSurface Model
         {
             get
             {
@@ -68,7 +71,7 @@ namespace MetaMorpheusGUI
 
         public PlotModelStat(string plotName, ObservableCollection<PsmFromTsv> psms)
         {
-            privateModel = new PlotModel { Title = plotName };
+            privateModel = new SciChartSurface { Name = plotName };
             allPsms = psms;
             createPlot(plotName);
         }
@@ -148,20 +151,20 @@ namespace MetaMorpheusGUI
             }
             if (plotType >= 3)
             {
-                ColumnSeries column = new ColumnSeries { ColumnWidth = 200, IsStacked = false, FillColor = OxyColors.Blue };
+                //ColumnSeries column = new ColumnSeries { ColumnWidth = 200, IsStacked = false, FillColor = OxyColors.Blue };
+                var column = new SciChart.Charting.Visuals.RenderableSeries.FastColumnRenderableSeries { DataPointWidth = 0.8, Fill = Brushes.Blue};
+                var series = new SciChart.Charting.Model.DataSeries.XyDataSeries<int, int>();
                 var counter = 0;
                 String[] category = new string[dict.Count];
                 foreach (var d in dict)
                 {
-                    column.Items.Add(new ColumnItem(d.Value, counter));
+                    series.Append(d.Value, counter);
                     category[counter] = d.Key;
                     counter++;
                 }
-                this.privateModel.Axes.Add(new CategoryAxis
-                {
-                    ItemsSource = category
-                });
-                privateModel.Series.Add(column);
+                this.privateModel.XAxis = new SciChart.Charting.Visuals.Axes.NumericAxis();
+                
+                privateModel.RenderableSeries.Add(column);
             }
             else
             {
@@ -194,12 +197,12 @@ namespace MetaMorpheusGUI
                     }
                 }
 
-                privateModel.Series.Add(s1);
-                privateModel.Axes.Add(new CategoryAxis
-                {
-                    Position = AxisPosition.Bottom,
-                    ItemsSource = axes
-                });
+                //privateModel.Series.Add(s1);
+                //privateModel.Axes.Add(new CategoryAxis
+                //{
+                //    Position = AxisPosition.Bottom,
+                //    ItemsSource = axes
+                //});
             }
         }
 
@@ -252,7 +255,7 @@ namespace MetaMorpheusGUI
             }
             series.MarkerFill = OxyColors.Blue;
             series.MarkerSize = 0.5;
-            privateModel.Series.Add(series);
+            //privateModel.Series.Add(series);
 
             // plot the variant containing peptides
             if (variantxy.Count != 0)
@@ -264,7 +267,7 @@ namespace MetaMorpheusGUI
                 }
                 variantSeries.MarkerFill = OxyColors.DarkRed;
                 variantSeries.MarkerSize = 1.5;
-                privateModel.Series.Add(variantSeries);
+                //privateModel.Series.Add(variantSeries);
             }
         }
 
